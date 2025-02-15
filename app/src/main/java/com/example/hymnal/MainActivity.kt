@@ -22,13 +22,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.hymnal.data.FavouriteHymnRepository
+import com.example.hymnal.data.FavouriteRepository
+import com.example.hymnal.data.HymnRepository
+import com.example.hymnal.data.HymnsViewModel
+import com.example.hymnal.data.HymnsViewModelFactory
 import com.example.hymnal.ui.components.BottomNavigationBar
+import com.example.hymnal.ui.components.FavouritesScreen
 import com.example.hymnal.ui.components.HymnsScreen
 import com.example.hymnal.ui.components.HymnsSearchBar
 import com.example.hymnal.ui.theme.HymnalTheme
@@ -46,6 +54,13 @@ class MainActivity : ComponentActivity() {
                     rememberTopAppBarState()
                 )
 
+                val hymnRepository = HymnRepository(LocalContext.current)
+                val favouriteRepository = FavouriteRepository(LocalContext.current)
+                val favouriteHymnRepository = FavouriteHymnRepository(hymnRepository, favouriteRepository)
+                val viewModelFactory = HymnsViewModelFactory(favouriteHymnRepository)
+                val hymnsViewModel = ViewModelProvider(this, viewModelFactory)
+                    .get(HymnsViewModel::class.java)
+
                 Scaffold(
                     topBar = { HymnalTopBar(navController, searchQuery, { searchQuery = it }, scrollBehavior) },
                     bottomBar = { BottomNavigationBar(navController) },
@@ -56,9 +71,8 @@ class MainActivity : ComponentActivity() {
                         startDestination = "Hymns",
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable("Hymns") { HymnsScreen(searchQuery = searchQuery) }
-                        composable("Favourites") { Text("Favourites") }
-                        composable("Settings") { Text("Settings") }
+                        composable("Hymns") { HymnsScreen(hymnsViewModel, searchQuery, hymnsViewModel::toggleFavourite) }
+                        composable("Favourites") { FavouritesScreen(hymnsViewModel, hymnsViewModel::toggleFavourite) }
                     }
                 }
             }
