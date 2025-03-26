@@ -24,14 +24,52 @@ fun HymnsScreen(
     toggleFavourite: (String) -> Unit,
 ) {
     val hymnData = viewModel.hymnState.collectAsState()
-    val filteredHymns = remember (searchQuery, hymnData.value) {
+    // keep a dictionary of the hymns with their ranking score based on the search query
+    val hymnScores = remember (searchQuery, hymnData.value) {
+        val scores = mutableMapOf<String, Int>()
+        hymnData.value.forEach { data ->
+            var score = 0
+
+            if (searchQuery.isNotEmpty()) {
+                if (data.hymn.hymn.toString().contains(searchQuery, ignoreCase = true)) {
+                    score += 100
+                }
+                if (data.hymn.title.contains(searchQuery, ignoreCase = true)) {
+                    score += 50
+                }
+                if (data.hymn.verses.any { verse ->
+                        verse.contains(
+                            searchQuery,
+                            ignoreCase = true
+                        )
+                    }) {
+                    score += 10
+                }
+                if (data.hymn.chorus.any { chorus ->
+                        chorus.contains(
+                            searchQuery,
+                            ignoreCase = true
+                        )
+                    }) {
+                    score += 20
+                } else if (data.hymn.author.contains(searchQuery, ignoreCase = true)) {
+                    score += 9
+                }
+            } else {
+                score = 0
+            }
+            scores[data.hymn.hymn.toString()] = score
+        }
+        scores
+    }
+    val filteredHymns = remember (hymnScores, hymnData.value) {
         hymnData.value.filter { data ->
             data.hymn.title.contains(searchQuery, ignoreCase = true)
                 || data.hymn.hymn.toString().contains(searchQuery, ignoreCase = true)
                 || data.hymn.author.contains(searchQuery, ignoreCase = true)
                 || data.hymn.verses.any { verse -> verse.contains(searchQuery, ignoreCase = true) }
                 || data.hymn.chorus.any { chorus -> chorus.contains(searchQuery, ignoreCase = true) }
-        }
+        }.sortedByDescending { data -> hymnScores[data.hymn.hymn.toString()] }
     }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {

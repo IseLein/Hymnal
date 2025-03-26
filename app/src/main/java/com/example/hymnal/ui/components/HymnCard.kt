@@ -80,7 +80,7 @@ fun HymnCard(hymnData: FavouriteHymn, searchQuery: String, toggleFavourite: (Str
         supportingContent = {
             if (searchQuery.isNotEmpty()) {
                 Text(
-                    text = "let's go????",
+                    text = hymnData.hymn.verses[0].split("\n")[0],
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium,
