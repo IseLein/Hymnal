@@ -1,5 +1,6 @@
 package com.example.hymnal.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -23,7 +24,12 @@ import com.example.hymnal.data.FavouriteHymn
 import com.example.hymnal.data.formatCase
 
 @Composable
-fun HymnCard(hymnData: FavouriteHymn, searchQuery: String, toggleFavourite: (String) -> Unit) {
+fun HymnCard(
+    hymnData: FavouriteHymn,
+    searchQuery: String,
+    toggleFavourite: (String) -> Unit,
+    onClick: () -> Unit
+) {
     val numWidth = with(LocalDensity.current) {
         rememberTextMeasurer().measure(
             text = "____",
@@ -31,6 +37,7 @@ fun HymnCard(hymnData: FavouriteHymn, searchQuery: String, toggleFavourite: (Str
         ).size.width.toDp()
     }
     ListItem(
+        modifier = Modifier.clickable(onClick = onClick),
         leadingContent = {
             Text(
                 text = hymnData.hymn.hymn.toString(),

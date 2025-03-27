@@ -22,6 +22,7 @@ fun HymnsScreen(
     viewModel: HymnsViewModel,
     searchQuery: String,
     toggleFavourite: (String) -> Unit,
+    onHymnClick: (String) -> Unit
 ) {
     val hymnData = viewModel.hymnState.collectAsState()
     // keep a dictionary of the hymns with their ranking score based on the search query
@@ -62,29 +63,25 @@ fun HymnsScreen(
         }
         scores
     }
-    val filteredHymns = remember (hymnScores, hymnData.value) {
-        hymnData.value.filter { data ->
-            data.hymn.title.contains(searchQuery, ignoreCase = true)
-                || data.hymn.hymn.toString().contains(searchQuery, ignoreCase = true)
-                || data.hymn.author.contains(searchQuery, ignoreCase = true)
-                || data.hymn.verses.any { verse -> verse.contains(searchQuery, ignoreCase = true) }
-                || data.hymn.chorus.any { chorus -> chorus.contains(searchQuery, ignoreCase = true) }
-        }.sortedByDescending { data -> hymnScores[data.hymn.hymn.toString()] }
-    }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        if (filteredHymns.isEmpty()) {
+        if (hymnData.value.isEmpty()) {
             item {
                 Text(
-                    text = "No hymns match your search",
+                    text = "No hymns found",
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
                 )
             }
         } else {
-            items(filteredHymns) { hymnData ->
-                HymnCard(hymnData, searchQuery, toggleFavourite)
+            items(hymnData.value.sortedByDescending { hymnScores[it.hymn.hymn.toString()] }) { hymnData ->
+                HymnCard(
+                    hymnData = hymnData,
+                    searchQuery = searchQuery,
+                    toggleFavourite = toggleFavourite,
+                    onClick = { onHymnClick(hymnData.hymn.hymn.toString()) }
+                )
             }
         }
     }

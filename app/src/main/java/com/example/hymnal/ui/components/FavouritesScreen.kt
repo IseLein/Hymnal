@@ -20,6 +20,7 @@ import com.example.hymnal.data.HymnsViewModel
 fun FavouritesScreen(
     viewModel: HymnsViewModel,
     toggleFavourite: (String) -> Unit,
+    onHymnClick: (String) -> Unit
 ) {
     val hymnData = viewModel.hymnState.collectAsState()
     val filteredHymns = hymnData.value.filter { data -> data.isFavourite }
@@ -29,14 +30,19 @@ fun FavouritesScreen(
             item {
                 Text(
                     text = "There no favourite hymns",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
                 )
             }
         } else {
             items(filteredHymns) { hymnData ->
-                HymnCard(hymnData, "", toggleFavourite)
+                HymnCard(
+                    hymnData = hymnData,
+                    searchQuery = "",
+                    toggleFavourite = toggleFavourite,
+                    onClick = { onHymnClick(hymnData.hymn.hymn.toString()) }
+                )
             }
         }
     }

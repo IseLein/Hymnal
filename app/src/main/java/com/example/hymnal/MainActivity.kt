@@ -26,10 +26,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.hymnal.data.FavouriteHymnRepository
 import com.example.hymnal.data.FavouriteRepository
 import com.example.hymnal.data.HymnRepository
@@ -37,6 +39,7 @@ import com.example.hymnal.data.HymnsViewModel
 import com.example.hymnal.data.HymnsViewModelFactory
 import com.example.hymnal.ui.components.BottomNavigationBar
 import com.example.hymnal.ui.components.FavouritesScreen
+import com.example.hymnal.ui.components.HymnDetailScreen
 import com.example.hymnal.ui.components.HymnsScreen
 import com.example.hymnal.ui.components.HymnsSearchBar
 import com.example.hymnal.ui.theme.HymnalTheme
@@ -71,8 +74,38 @@ class MainActivity : ComponentActivity() {
                         startDestination = "Hymns",
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable("Hymns") { HymnsScreen(hymnsViewModel, searchQuery, hymnsViewModel::toggleFavourite) }
-                        composable("Favourites") { FavouritesScreen(hymnsViewModel, hymnsViewModel::toggleFavourite) }
+                        composable("Hymns") { 
+                            HymnsScreen(
+                                hymnsViewModel,
+                                searchQuery,
+                                hymnsViewModel::toggleFavourite,
+                                onHymnClick = { hymnId ->
+                                    navController.navigate("HymnDetail/$hymnId")
+                                }
+                            )
+                        }
+                        composable("Favourites") { 
+                            FavouritesScreen(
+                                hymnsViewModel,
+                                hymnsViewModel::toggleFavourite,
+                                onHymnClick = { hymnId ->
+                                    navController.navigate("HymnDetail/$hymnId")
+                                }
+                            )
+                        }
+                        composable(
+                            route = "HymnDetail/{hymnId}",
+                            arguments = listOf(
+                                navArgument("hymnId") { type = NavType.StringType }
+                            )
+                        ) { backStackEntry ->
+                            val hymnId = backStackEntry.arguments?.getString("hymnId") ?: return@composable
+                            HymnDetailScreen(
+                                hymnId = hymnId,
+                                viewModel = hymnsViewModel,
+                                onNavigateBack = { navController.navigateUp() }
+                            )
+                        }
                     }
                 }
             }
@@ -84,7 +117,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HymnalTopBar(
     navController: NavHostController,
-    searchQuery: String, onQueryChange: (String) -> Unit,
+    searchQuery: String,
+    onQueryChange: (String) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
