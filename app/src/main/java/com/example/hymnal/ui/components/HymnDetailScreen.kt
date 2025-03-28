@@ -21,6 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.hymnal.data.HymnsViewModel
 import com.example.hymnal.data.formatCase
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +51,9 @@ fun HymnDetailScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         rememberTopAppBarState()
     )
+
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setStatusBarColor(MaterialTheme.colorScheme.surfaceContainer)
 
     Scaffold(
         topBar = {
@@ -76,14 +83,15 @@ fun HymnDetailScreen(
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                windowInsets = WindowInsets(0.dp)
             )
         }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(padding)
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             state = rememberLazyListState()
         ) {
@@ -92,14 +100,37 @@ fun HymnDetailScreen(
                     text = formatCase(currentHymn.hymn.title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
                 )
             }
 
+            if (currentHymn.hymn.key.isNotEmpty()) {
+                val annotatedText = buildAnnotatedString {
+                    append("Key: ")
+                    append(currentHymn.hymn.key)
+                    addStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        start = "Key: ".length,
+                        end = "Key: ".length + currentHymn.hymn.key.length
+                    )
+                }
+                item {
+                    Text(
+                        text = annotatedText,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 36.dp, vertical = 4.dp)
+                    )
+                }
+            }
             if (currentHymn.hymn.bible_ref.isNotEmpty()) {
                 item {
                     Text(
@@ -107,7 +138,7 @@ fun HymnDetailScreen(
                         style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 36.dp, vertical = 8.dp)
+                            .padding(horizontal = 36.dp, vertical = 4.dp)
                     )
                 }
             }
@@ -120,38 +151,93 @@ fun HymnDetailScreen(
                 item {
                     Text(
                         text = "${index + 1}",
-                        style = MaterialTheme.typography.titleMedium.copy(
+                        style = MaterialTheme.typography.headlineSmall.copy(
                             fontWeight = FontWeight.Bold,
-                            fontStyle = FontStyle.Italic
+                            fontStyle = FontStyle.Italic,
+                            fontFamily = FontFamily.Serif
                         ),
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 60.dp, vertical = 8.dp),
+                        textAlign = TextAlign.End
                     )
-                    Text(
-                        text = verse,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-                    )
+                    verse.split("\n").forEach { line ->
+                        Text(
+                            text = line,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                     if (currentHymn.hymn.chorus.isNotEmpty()) {
                         currentHymn.hymn.chorus.forEach { chorus ->
                             Text(
                                 text = chorus,
-                                style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontStyle = FontStyle.Italic,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
 
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+
             if (currentHymn.hymn.author.isNotEmpty()) {
+                var metaTitle = currentHymn.hymn.meta_title
+                if (metaTitle.isNotEmpty()) {
+                    metaTitle = "; $metaTitle"
+                }
+                item {
+                    val annotatedText = buildAnnotatedString {
+                        append("Author: ")
+                        append(currentHymn.hymn.title)
+                        append(metaTitle)
+                        addStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            start = 0,
+                            end = "Author:".length
+                        )
+                    }
+                    Text(
+                        text = annotatedText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp, vertical = 4.dp),
+                    )
+                }
+            }
+            if (currentHymn.hymn.author_music.isNotEmpty()) {
+                var metaMusic = currentHymn.hymn.meta_music
+                if (metaMusic.isNotEmpty()) {
+                    metaMusic = "; $metaMusic"
+                }
+                val annotatedText = buildAnnotatedString {
+                    append("Music: ")
+                    append(currentHymn.hymn.title)
+                    append(metaMusic)
+                    addStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        start = 0,
+                        end = "Music:".length
+                    )
+                }
                 item {
                     Text(
-                        text = "Author: ${currentHymn.hymn.author}",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = annotatedText,
+                        style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                        textAlign = TextAlign.End
+                            .padding(horizontal = 24.dp, vertical = 4.dp),
                     )
                 }
             }

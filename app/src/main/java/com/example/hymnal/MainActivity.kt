@@ -64,9 +64,16 @@ class MainActivity : ComponentActivity() {
                 val hymnsViewModel = ViewModelProvider(this, viewModelFactory)
                     .get(HymnsViewModel::class.java)
 
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+
                 Scaffold(
                     topBar = { HymnalTopBar(navController, searchQuery, { searchQuery = it }, scrollBehavior) },
-                    bottomBar = { BottomNavigationBar(navController) },
+                    bottomBar = {
+                        if (currentDestination?.route?.startsWith("HymnDetail/") != true) {
+                            BottomNavigationBar(navController)
+                        }
+                    },
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                 ) { innerPadding ->
                     NavHost(
