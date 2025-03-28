@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.hymnal.data.FavouriteHymnRepository
 import com.example.hymnal.data.FavouriteRepository
+import com.example.hymnal.data.HymnAudioViewModel
 import com.example.hymnal.data.HymnRepository
 import com.example.hymnal.data.HymnsViewModel
 import com.example.hymnal.data.HymnsViewModelFactory
@@ -63,6 +64,7 @@ class MainActivity : ComponentActivity() {
                 val viewModelFactory = HymnsViewModelFactory(favouriteHymnRepository)
                 val hymnsViewModel = ViewModelProvider(this, viewModelFactory)
                     .get(HymnsViewModel::class.java)
+                val audioViewModel = HymnAudioViewModel()
 
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -110,6 +112,7 @@ class MainActivity : ComponentActivity() {
                             HymnDetailScreen(
                                 hymnId = hymnId,
                                 viewModel = hymnsViewModel,
+                                audioViewModel = audioViewModel,
                                 onNavigateBack = { navController.navigateUp() }
                             )
                         }

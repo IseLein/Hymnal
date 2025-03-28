@@ -1,6 +1,14 @@
 package com.example.hymnal.ui.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -17,10 +25,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -29,6 +40,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.hymnal.data.HymnAudioViewModel
 import com.example.hymnal.data.HymnsViewModel
 import com.example.hymnal.data.formatCase
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -38,13 +53,38 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 fun HymnDetailScreen(
     hymnId: String,
     viewModel: HymnsViewModel,
+    audioViewModel: HymnAudioViewModel,
     onNavigateBack: () -> Unit
 ) {
     val hymnData by viewModel.hymnState.collectAsState()
     val currentHymn = hymnData.find { it.hymn.hymn.toString() == hymnId }
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = hymnId) {
+        audioViewModel.initializeAudio(context, hymnId)
+    }
+
+    // handle lifecycle events
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                if (audioViewModel.isPlaying.value) {
+                    audioViewModel.playPause()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            // release player?
+        }
+    }
     
     if (currentHymn == null) {
-        onNavigateBack()
+        LaunchedEffect(Unit) {
+            onNavigateBack()
+        }
         return
     }
 
@@ -54,6 +94,8 @@ fun HymnDetailScreen(
 
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.surfaceContainer)
+
+    val isAudioAvailable by audioViewModel.isAudioAvailable.collectAsState()
 
     Scaffold(
         topBar = {
@@ -86,6 +128,24 @@ fun HymnDetailScreen(
                 scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets(0.dp)
             )
+        },
+        bottomBar = {
+            val showPlayer = (isAudioAvailable == true) && (scrollBehavior.state.collapsedFraction < 0.5f)
+            AnimatedVisibility(
+                visible = showPlayer,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it }),
+            ) {
+                HymnAudioPlayer(
+                    isPlaying = audioViewModel.isPlaying.collectAsState().value,
+                    progress = audioViewModel.progress.collectAsState().value,
+                    duration = audioViewModel.duration.collectAsState().value,
+                    onPlayPause = audioViewModel::playPause,
+                    onSeek = audioViewModel::seek,
+                    onForward = audioViewModel::forward5Seconds,
+                    onRewind = audioViewModel::rewind5Seconds
+                )
+            }
         }
     ) { padding ->
         LazyColumn(
@@ -197,7 +257,7 @@ fun HymnDetailScreen(
                 item {
                     val annotatedText = buildAnnotatedString {
                         append("Author: ")
-                        append(currentHymn.hymn.title)
+                        append(currentHymn.hymn.author)
                         append(metaTitle)
                         addStyle(
                             style = SpanStyle(
@@ -222,7 +282,7 @@ fun HymnDetailScreen(
                 }
                 val annotatedText = buildAnnotatedString {
                     append("Music: ")
-                    append(currentHymn.hymn.title)
+                    append(currentHymn.hymn.author_music)
                     append(metaMusic)
                     addStyle(
                         style = SpanStyle(
