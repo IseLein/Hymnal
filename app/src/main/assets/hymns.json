@@ -466,12 +466,16 @@
     "bible_ref": "And be not drunk with wine, wherein is excess; but be filled with the Spirit. Eph 5:18",
     "key": "F",
     "verses": [
-      "Kneels at the feet of his friends,\nSilently washes their feet,\nMaster who pours out himself for them.\nJesu, Jesu, fill us with your love,\nShow us how to serve\nThe neighbours we have from you.",
+      "Kneels at the feet of his friends,\nSilently washes their feet,\nMaster who pours out himself for them.",
       "Neighbours are rich and poor,\nNeighbours are black and white,\nNeighbours are near and far away.",
       "These are the ones we should serve,\nThese are the ones we should love.\nAll these are neighbours to us and you.",
       "Loving puts us on our kneels\nServing as though we are slaves\nThis is the way we should live with you."
     ],
-    "chorus": [],
+    "chorus": [
+      "Jesus, Jesus, fill us with your love,",
+      "Show us how to serve",
+      "The neighbours we have from you."
+    ],
     "author": "Tom Colvin",
     "author_music": "Ghana Folks Songs",
     "meta_title": "CHEREPONI",

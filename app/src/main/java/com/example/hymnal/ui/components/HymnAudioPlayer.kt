@@ -45,26 +45,22 @@ fun HymnAudioPlayer(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Progress slider
             Slider(
                 value = progress,
                 onValueChange = onSeek,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Time indicators and controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Current time / Duration
                 Text(
                     text = "${formatDuration(round(progress * duration).toLong())} / ${formatDuration(duration)}",
                     style = MaterialTheme.typography.bodySmall
                 )
 
-                // Control buttons
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
