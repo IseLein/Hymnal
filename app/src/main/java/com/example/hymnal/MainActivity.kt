@@ -62,9 +62,9 @@ class MainActivity : ComponentActivity() {
                 val favouriteRepository = FavouriteRepository(LocalContext.current)
                 val favouriteHymnRepository = FavouriteHymnRepository(hymnRepository, favouriteRepository)
                 val viewModelFactory = HymnsViewModelFactory(favouriteHymnRepository)
-                val hymnsViewModel = ViewModelProvider(this, viewModelFactory)
+                val hymnsViewModel = ViewMoelProvider(this, viewModelFactory)
                     .get(HymnsViewModel::class.java)
-                val audioViewModel = HymnAudioViewModel()
+                val audioViewModel = ViewModelProvider(this).get(HymnAudioViewModel::class.java)
 
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
