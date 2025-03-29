@@ -1,10 +1,12 @@
 package com.example.hymnal.ui.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -23,8 +25,9 @@ fun BottomNavigationBar(navController: NavHostController)  {
     systemUiController.setNavigationBarColor(MaterialTheme.colorScheme.surfaceContainer)
 
     val routes = listOf(
-        Route("Hymns", Icons.Filled.Home, Icons.Outlined.Home),
-        Route("Favourites", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder),
+        Route("Hymns", Icons.Rounded.Home, Icons.Outlined.Home),
+        Route("Favourites", Icons.Rounded.Favorite, Icons.Outlined.FavoriteBorder),
+        Route("About", Icons.Rounded.Info, Icons.Outlined.Info)
     )
 
     NavigationBar() {

@@ -159,7 +159,6 @@ fun HymnDetailScreen(
                 Text(
                     text = formatCase(currentHymn.hymn.title),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif
                     ),

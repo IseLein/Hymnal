@@ -38,6 +38,7 @@ import com.example.hymnal.data.HymnAudioViewModel
 import com.example.hymnal.data.HymnRepository
 import com.example.hymnal.data.HymnsViewModel
 import com.example.hymnal.data.HymnsViewModelFactory
+import com.example.hymnal.ui.components.AboutScreen
 import com.example.hymnal.ui.components.BottomNavigationBar
 import com.example.hymnal.ui.components.FavouritesScreen
 import com.example.hymnal.ui.components.HymnDetailScreen
@@ -102,6 +103,9 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+                        composable("About") {
+                            AboutScreen()
+                        }
                         composable(
                             route = "HymnDetail/{hymnId}",
                             arguments = listOf(
@@ -150,6 +154,10 @@ fun HymnalTopBar(
     } else if (currentDestination?.route == "Settings") {
         CenterAlignedTopAppBar(
             title = { Text("Settings") },
+        )
+    } else if (currentDestination?.route == "About") {
+        CenterAlignedTopAppBar(
+            title = { Text("About") },
         )
     }
 }
