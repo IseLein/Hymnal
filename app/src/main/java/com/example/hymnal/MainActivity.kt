@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                 val favouriteRepository = FavouriteRepository(LocalContext.current)
                 val favouriteHymnRepository = FavouriteHymnRepository(hymnRepository, favouriteRepository)
                 val viewModelFactory = HymnsViewModelFactory(favouriteHymnRepository)
-                val hymnsViewModel = ViewMoelProvider(this, viewModelFactory)
+                val hymnsViewModel = ViewModelProvider(this, viewModelFactory)
                     .get(HymnsViewModel::class.java)
                 val audioViewModel = ViewModelProvider(this).get(HymnAudioViewModel::class.java)
 
